@@ -1,14 +1,43 @@
 # VirtualThreadProducer
 
+A project demonstrating the performance differences between **platform threads** and **virtual threads** when consuming Kafka events.
+
 ## Overview
-This project produces Kafka events and uses two modules to simulate consuming with platform threads and virtual threads.
 
-## Modules
-1. **Platform Threads**: This module simulates consuming Kafka events using traditional platform threads.
-2. **Virtual Threads**: This module simulates consuming Kafka events utilizing modern virtual threads.
+This project consists of three modules that work together to simulate real-world message consumption scenarios:
 
-## Docker
-The entire setup is containerized using Docker to ensure ease of deployment and scalability.
+- **KafkaProducerVirtualThreadTest**: Produces Kafka events that are consumed by the other modules
+- **PlatformTest**: Simulates event consumption using traditional **platform threads** (OS-level threads)
+- **VirtualThreadTest**: Simulates event consumption using **virtual threads** (lightweight, managed by the JVM)
 
-## Usage
-To run the project, follow the instructions in the Dockerfile to build and run the Docker container.
+## Purpose
+
+The primary goal of this project is to benchmark and compare the performance characteristics of platform threads versus virtual threads when processing Kafka messages at scale. This is useful for understanding:
+
+- Memory efficiency differences between thread models
+- Throughput and latency variations
+- Resource utilization (CPU, memory) under high concurrency
+- Scalability potential with virtual threads
+
+## Architecture
+
+The project leverages **Docker** to containerize and orchestrate the components, ensuring consistent execution environments and easy deployment.
+
+### Components
+
+1. **Kafka Producer** - Generates test events to be consumed
+2. **Platform Thread Consumer** - Traditional threading model consumer
+3. **Virtual Thread Consumer** - Modern lightweight threading model consumer
+
+## Getting Started
+
+### Prerequisites
+
+- Docker
+- Docker Compose
+- Java 21+ (for virtual thread support)
+
+### Running the Project
+
+```bash
+docker-compose up
