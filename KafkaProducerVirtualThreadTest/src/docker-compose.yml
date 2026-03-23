@@ -1,0 +1,69 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+      # Internal + external listeners
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  producer:
+    image: producer
+    environment:
+      KAFKA_BOOTSTRAP: kafka:29092
+      MESSAGE_NUM: 100000
+      JAVA_TOOL_OPTIONS: "-Xmx768M -Xms768M"
+    depends_on:
+      - kafka
+    restart: "no"
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+
+  consumer:
+    image: read-to-end-consumer
+    # OR build it from the Dockerfile in the current folder:
+    # build: .
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_BOOTSTRAP: kafka:29092
+      KAFKA_TOPIC: test-topic
+      KAFKA_GROUP: read-to-end-consumer-platform-test-2
+      IDLE_SECONDS: "3"
+      JAVA_TOOL_OPTIONS: "-Xmx1024M -Xmx1024M"
+    restart: "no"
+
+  consumer-virtual:
+    image: read-to-end-virtual
+    # OR build it from the Dockerfile in the current folder:
+    # build: .
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_BOOTSTRAP: kafka:29092
+      KAFKA_TOPIC: test-topic
+      KAFKA_GROUP: read-to-end-consumer-virtual-test-3
+      IDLE_SECONDS: "3"
+      JAVA_TOOL_OPTIONS: "-Xmx1024M -Xmx1024M"
+    restart: "no"
